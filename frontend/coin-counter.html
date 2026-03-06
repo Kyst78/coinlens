@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoinLens — นับเหรียญอัจฉริยะ</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: #252535;
+    --gold: #f5c842;
+    --gold2: #e8a020;
+    --silver: #b8c4d0;
+    --accent: #4f9eff;
+    --success: #3dd68c;
+    --text: #e8e8f0;
+    --muted: #6e6e88;
+    --danger: #ff5f7e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── Background ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(245,200,66,.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 110%, rgba(79,158,255,.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── Navbar ─── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 64px;
+    background: rgba(10,10,15,.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-decoration: none;
+  }
+
+  .coin-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: conic-gradient(var(--gold), var(--gold2), var(--gold));
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem;
+    box-shadow: 0 0 12px rgba(245,200,66,.4);
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: .25rem;
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 4px;
+    border: 1px solid var(--border);
+  }
+
+  .nav-tab {
+    padding: .4rem 1rem;
+    border-radius: 7px;
+    font-size: .85rem;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Sarabun', sans-serif;
+    transition: all .2s;
+  }
+
+  .nav-tab.active, .nav-tab:hover {
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  .nav-tab.active {
+    color: var(--gold);
+    box-shadow: inset 0 0 0 1px rgba(245,200,66,.25);
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+  }
+
+  /* ─── Login Button ─── */
+  .btn-login {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .45rem 1.1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Sarabun', sans-serif;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .btn-login:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(245,200,66,.05);
+  }
+
+  .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem;
+    font-weight: 700;
+    color: #000;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color .2s;
+  }
+
+  .avatar:hover { border-color: var(--gold); }
+
+  /* ─── Pages ─── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ─── Upload Page ─── */
+  .upload-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-text {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-text h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: .75rem;
+  }
+
+  .hero-text h1 span {
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-text p {
+    color: var(--muted);
+    font-size: 1.05rem;
+  }
+
+  /* ─── Upload Zone ─── */
+  .upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 20px;
+    padding: 4rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all .3s;
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .upload-area::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(245,200,66,.04) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity .3s;
+  }
+
+  .upload-area:hover, .upload-area.drag {
+    border-color: var(--gold);
+    background: rgba(245,200,66,.03);
+  }
+
+  .upload-area:hover::before, .upload-area.drag::before { opacity: 1; }
+
+  .upload-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .upload-area h3 {
+    font-size: 1.25rem;
+    margin-bottom: .5rem;
+  }
+
+  .upload-area p {
+    color: var(--muted);
+    font-size: .9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .upload-btns {
+    display: flex;
+    gap: .75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .65rem 1.5rem;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #000;
+    font-family: 'Sarabun', sans-serif;
+    font-size: .95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+    box-shadow: 0 4px 16px rgba(245,200,66,.25);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(245,200,66,.35);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .65rem 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: 'Sarabun', sans-serif;
+    font-size: .95rem;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--silver);
+    transform: translateY(-1px);
+  }
+
+  /* ─── Preview Panel ─── */
+  .preview-panel {
+    display: none;
+    margin-top: 2rem;
+    gap: 1.5rem;
+  }
+
+  .preview-panel.show { display: grid; grid-template-columns: 1fr 340px; }
+
+  .preview-image-box {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .preview-image-box img {
+    width: 100%;
+    display: block;
+    max-height: 480px;
+    object-fit: contain;
+    background: #05050a;
+  }
+
+  /* Labels overlay */
+  .label-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .coin-label {
+    position: absolute;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgba(245,200,66,.3), inset 0 0 0 1px rgba(245,200,66,.2);
+  }
+
+  .coin-label-text {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gold);
+    color: #000;
+    font-size: .65rem;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ─── Result Card ─── */
+  .result-card {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .result-card h3 {
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .total-amount {
+    text-align: center;
+    padding: 1.25rem;
+    background: var(--surface2);
+    border-radius: 12px;
+    border: 1px solid rgba(245,200,66,.2);
+  }
+
+  .total-amount .label { font-size: .8rem; color: var(--muted); }
+
+  .total-amount .value {
+    font-family: 'Space Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin: .25rem 0;
+  }
+
+  .total-amount .unit { font-size: .85rem; color: var(--muted); }
+
+  .coin-breakdown { display: flex; flex-direction: column; gap: .5rem; }
+
+  .coin-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .5rem .75rem;
+    border-radius: 8px;
+    background: var(--surface2);
+    transition: background .2s;
+  }
+
+  .coin-row:hover { background: rgba(245,200,66,.06); }
+
+  .coin-badge {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .coin-badge.b1 { background: linear-gradient(135deg,#c0c8d4,#8a96a4); color:#fff; }
+  .coin-badge.b2 { background: linear-gradient(135deg,#b8c4d0,#7a8898); color:#fff; }
+  .coin-badge.b025 { background: linear-gradient(135deg,#b8c4d0,#6e7a88); color:#fff; }
+  .coin-badge.b050 { background: linear-gradient(135deg,#c8a840,#7d5a16); color:#fff; }
+  .coin-badge.b5 { background: linear-gradient(135deg,#c8a840,#a07820); color:#fff; }
+  .coin-badge.b10 { background: linear-gradient(135deg,#f5c842,#c89020); color:#000; }
+
+  .coin-row-name { flex: 1; font-size: .9rem; }
+  .coin-row-count { font-family: 'Space Mono', monospace; font-size: .85rem; color: var(--muted); }
+  .coin-row-val { font-family: 'Space Mono', monospace; font-size: .85rem; color: var(--gold); width: 56px; text-align: right; }
+
+  .result-actions { display: flex; flex-direction: column; gap: .5rem; }
+
+  .btn-save {
+    width: 100%;
+    padding: .7rem;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #000;
+    font-family: 'Sarabun', sans-serif;
+    font-size: .95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .btn-save:hover { opacity: .9; transform: translateY(-1px); }
+
+  .btn-loader {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    border: 2px solid rgba(0,0,0,.25);
+    border-top-color: rgba(0,0,0,.7);
+    margin-right: 6px;
+    vertical-align: middle;
+    animation: spin .8s linear infinite;
+  }
+
+  .btn-new {
+    width: 100%;
+    padding: .7rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Sarabun', sans-serif;
+    font-size: .9rem;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .btn-new:hover { border-color: var(--text); color: var(--text); }
+
+  /* ─── Processing Overlay ─── */
+  .processing {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(10,10,15,.8);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    border-radius: 16px;
+    z-index: 10;
+  }
+
+  .processing.show { display: flex; }
+
+  .spinner {
+    width: 48px; height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .processing p { color: var(--muted); font-size: .9rem; }
+
+  /* ─── History Page ─── */
+  .history-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+
+  .page-header h2 { font-size: 1.5rem; font-weight: 700; }
+
+  .history-toolbar {
+    display: flex;
+    gap: .75rem;
+    align-items: center;
+  }
+
+  .select-all-btn {
+    padding: .4rem .9rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'Sarabun', sans-serif;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .select-all-btn:hover { border-color: var(--text); color: var(--text); }
+
+  .btn-merge {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .45rem 1.1rem;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #000;
+    font-family: 'Sarabun', sans-serif;
+    font-size: .85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+    box-shadow: 0 3px 10px rgba(245,200,66,.2);
+  }
+
+  .btn-merge:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .btn-merge:not(:disabled):hover { transform: translateY(-1px); }
+
+  /* ─── History Grid ─── */
+  .history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .history-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+  }
+
+  .history-card:hover { border-color: rgba(245,200,66,.3); transform: translateY(-2px); }
+  .history-card.selected { border-color: var(--gold); box-shadow: 0 0 0 1px rgba(245,200,66,.2); }
+
+  .history-card .check {
+    position: absolute;
+    top: .75rem;
+    right: .75rem;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem;
+    z-index: 2;
+    transition: all .2s;
+  }
+
+  .history-card.selected .check {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #000;
+  }
+
+  .history-thumb {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    background: #05050a;
+    display: block;
+  }
+
+  .history-body { padding: 1rem; }
+
+  .history-body .date {
+    font-size: .75rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: .35rem;
+  }
+
+  .history-body .amount {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: .35rem;
+  }
+
+  .history-body .coins-summary {
+    font-size: .8rem;
+    color: var(--muted);
+  }
+
+  /* ─── Merge Modal ─── */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-backdrop.show { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 520px;
+    width: 90%;
+    position: relative;
+    animation: modalIn .25s ease;
+  }
+
+  @keyframes modalIn { from { opacity:0; transform:scale(.95) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all .2s;
+  }
+
+  .modal-close:hover { border-color: var(--text); color: var(--text); }
+
+  .modal h3 { font-size: 1.2rem; margin-bottom: 1.5rem; }
+  .modal h3 span { color: var(--gold); }
+
+  .merge-total {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--surface2);
+    border-radius: 14px;
+    border: 1px solid rgba(245,200,66,.25);
+    margin-bottom: 1.5rem;
+  }
+
+  .merge-total .big {
+    font-family: 'Space Mono', monospace;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .merge-total .sub { font-size: .85rem; color: var(--muted); margin-top: .25rem; }
+
+  .merge-breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .merge-item {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .6rem .75rem;
+    background: var(--surface2);
+    border-radius: 9px;
+  }
+
+  .merge-item .num {
+    font-family: 'Space Mono', monospace;
+    font-size: .85rem;
+    color: var(--text);
+  }
+
+  .merge-item .val {
+    font-family: 'Space Mono', monospace;
+    font-size: .75rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  .modal-actions { display: flex; gap: .75rem; }
+
+  .btn-export {
+    flex: 1;
+    padding: .7rem;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #000;
+    font-family: 'Sarabun', sans-serif;
+    font-size: .95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .btn-export:hover { opacity: .9; }
+
+  .btn-cancel {
+    flex: 1;
+    padding: .7rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Sarabun', sans-serif;
+    font-size: .9rem;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .btn-cancel:hover { border-color: var(--text); color: var(--text); }
+
+  /* ─── Login Modal ─── */
+  .login-modal-content {
+    text-align: center;
+  }
+
+  .login-modal-content .lock-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  .login-modal-content h3 { font-size: 1.3rem; margin-bottom: .5rem; }
+  .login-modal-content p { color: var(--muted); font-size: .9rem; margin-bottom: 1.75rem; }
+
+  .btn-google {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    padding: .85rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all .2s;
+    margin-bottom: .75rem;
+  }
+
+  .btn-google:hover { border-color: #4285f4; background: rgba(66,133,244,.08); color: #4285f4; }
+
+  .btn-google svg { width: 20px; height: 20px; }
+
+  .login-note {
+    margin-top: 1.25rem;
+    font-size: .8rem;
+    color: var(--muted);
+  }
+
+  /* ─── Toast ─── */
+  .toast-container {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    z-index: 999;
+  }
+
+  .toast {
+    padding: .75rem 1.25rem;
+    border-radius: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: .88rem;
+    animation: toastIn .3s ease;
+    max-width: 300px;
+  }
+
+  .toast.success { border-left: 3px solid var(--success); }
+  .toast.info { border-left: 3px solid var(--accent); }
+
+  @keyframes toastIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
+
+  /* ─── Empty State ─── */
+  .empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+    color: var(--muted);
+  }
+
+  .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; display: block; opacity: .4; }
+  .empty-state h3 { font-size: 1.1rem; color: var(--text); margin-bottom: .5rem; }
+  .empty-state p { font-size: .9rem; }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 720px) {
+    .preview-panel.show { grid-template-columns: 1fr; }
+    .hero-text h1 { font-size: 2rem; }
+    .merge-breakdown { grid-template-columns: 1fr; }
+    .nav-tabs { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav>
+  <a class="nav-logo" href="#" onclick="switchPage('upload')">
+    <div class="coin-icon">฿</div>
+    CoinLens
+  </a>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="tab-upload" onclick="switchPage('upload')">นับเหรียญ</button>
+    <button class="nav-tab" id="tab-history" onclick="switchPage('history')">ประวัติ</button>
+  </div>
+
+  <div class="nav-right">
+    <div id="guest-btns">
+      <button class="btn-login" onclick="showLoginModal()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        เข้าสู่ระบบ
+      </button>
+    </div>
+    <div id="user-btns" style="display:none; align-items:center; gap:.6rem; display:none;">
+      <span style="font-size:.85rem; color:var(--muted)">สวัสดี, <span id="user-name">User</span></span>
+      <div class="avatar" title="ออกจากระบบ" onclick="logout()">U</div>
+    </div>
+  </div>
+</nav>
+
+<!-- Upload Page -->
+<div class="page active" id="page-upload">
+  <div class="upload-page">
+    <div class="hero-text">
+      <h1>นับเหรียญ<span>อัตโนมัติ</span><br>ด้วย AI</h1>
+      <p>อัปโหลดรูปกองเหรียญ — AI วิเคราะห์และรวมมูลค่าให้ทันที</p>
+    </div>
+
+    <!-- Upload Zone -->
+    <div class="upload-area" id="dropzone"
+         ondragover="handleDragOver(event)"
+         ondragleave="handleDragLeave(event)"
+         ondrop="handleDrop(event)"
+         onclick="document.getElementById('file-input').click()">
+      <span class="upload-icon">🪙</span>
+      <h3>วางรูปภาพตรงนี้</h3>
+      <p>รองรับ JPG, PNG, HEIC ขนาดไม่เกิน 10MB</p>
+      <div class="upload-btns" onclick="event.stopPropagation()">
+        <button class="btn-primary" onclick="document.getElementById('file-input').click()">
+          📁 เลือกไฟล์
+        </button>
+        <button class="btn-secondary" onclick="openCamera()">
+          📷 ถ่ายรูป
+        </button>
+      </div>
+    </div>
+    <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFile(event)">
+    <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="handleFile(event)">
+
+    <!-- Preview + Result -->
+    <div class="preview-panel" id="preview-panel">
+      <!-- Image Box -->
+      <div class="preview-image-box">
+        <img src="" id="preview-img" alt="preview">
+        <!-- Label overlay (demo) -->
+        <div class="label-overlay" id="label-overlay"></div>
+        <!-- Processing overlay -->
+        <div class="processing" id="processing-overlay">
+          <div class="spinner"></div>
+          <p>กำลังวิเคราะห์เหรียญ...</p>
+        </div>
+      </div>
+
+      <!-- Result Card -->
+      <div class="result-card" id="result-card">
+        <h3>📊 ผลการนับ</h3>
+
+        <div class="total-amount">
+          <div class="label">มูลค่ารวมทั้งหมด</div>
+          <div class="value" id="total-val">—</div>
+          <div class="unit">บาท</div>
+        </div>
+
+        <div class="coin-breakdown" id="coin-breakdown">
+          <!-- Filled by JS -->
+        </div>
+
+        <div class="result-actions" id="result-actions" style="display:none">
+          <button class="btn-save" onclick="saveResult()">💾 บันทึกผลลัพธ์</button>
+          <button class="btn-new" onclick="resetUpload()">↩ นับใหม่</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- History Page -->
+<div class="page" id="page-history">
+  <div class="history-page">
+    <div class="page-header">
+      <h2>ประวัติการนับ</h2>
+      <div class="history-toolbar">
+        <button class="select-all-btn" onclick="toggleSelectAll()">เลือกทั้งหมด</button>
+        <button class="btn-merge" id="merge-btn" disabled onclick="showMergeModal()">
+          ➕ รวมยอด (<span id="selected-count">0</span>)
+        </button>
+        <button class="btn-merge" id="delete-btn" disabled onclick="deleteSelected()" style="background:linear-gradient(135deg,#ff5f7e,#ff3b5c);">
+          🗑️ ลบ (<span id="delete-count">0</span>)
+        </button>
+      </div>
+    </div>
+
+    <div class="history-grid" id="history-grid">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div class="modal-backdrop" id="login-modal">
+  <div class="modal" style="max-width:420px">
+    <button class="modal-close" onclick="closeLoginModal()">✕</button>
+    <div class="login-modal-content">
+      <span class="lock-icon">🔐</span>
+      <h3>เข้าสู่ระบบเพื่อบันทึกผล</h3>
+      <p>ล็อกอินเพื่อบันทึกประวัติ ดูสถิติ<br>และสรุปยอดรวมหลายรอบ</p>
+
+      <button class="btn-google" onclick="loginGoogle()">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        ดำเนินการต่อด้วย Google
+      </button>
+
+      <p class="login-note">🔒 ข้อมูลของคุณจะถูกเข้ารหัสและเก็บปลอดภัย</p>
+    </div>
+  </div>
+</div>
+
+<!-- Merge Modal -->
+<div class="modal-backdrop" id="merge-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeMergeModal()">✕</button>
+    <h3>สรุปยอดรวม <span id="merge-rounds">0 รอบ</span></h3>
+
+    <div class="merge-total">
+      <div class="big" id="merge-total-val">0.00</div>
+      <div class="sub">บาท รวมทั้งหมด</div>
+    </div>
+
+    <div class="merge-breakdown" id="merge-breakdown"></div>
+
+    <div class="modal-actions">
+      <button class="btn-export" onclick="closeMergeModal()">✅ ปิด</button>
+      <button class="btn-cancel" onclick="closeMergeModal()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+
+  // ใส่ config ที่ได้จาก Firebase Console
+ const firebaseConfig = {
+  apiKey: "AIzaSyBdvJIFeeW2ILZTZonbL-U57BuqKYdQXv8",
+  authDomain: "coinlens-6c270.firebaseapp.com",
+  projectId: "coinlens-6c270",
+  storageBucket: "coinlens-6c270.firebasestorage.app",
+  messagingSenderId: "1029884991812",
+  appId: "1:1029884991812:web:d7b5a0c3a1fe34a0649f11",
+  measurementId: "G-T9YDVNX601"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  // ตรวจสอบสถานะ login อัตโนมัติ
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // login อยู่
+      isLoggedIn = true;
+      userToken = null;
+      user.getIdToken().then(token => { userToken = token; });
+
+      document.getElementById('guest-btns').style.display = 'none';
+      const ub = document.getElementById('user-btns');
+      ub.style.display = 'flex';
+      document.getElementById('user-name').textContent = user.displayName?.split(' ')[0] || 'User';
+      document.querySelector('.avatar').textContent = (user.displayName?.[0] || 'U').toUpperCase();
+    } else {
+      // ยังไม่ได้ login
+      isLoggedIn = false;
+      userToken = null;
+      document.getElementById('user-btns').style.display = 'none';
+      document.getElementById('guest-btns').style.display = '';
+    }
+  });
+
+  // ผูก function กับ window เพื่อให้ script เดิมเรียกได้
+  window.firebaseLoginGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const token = await result.user.getIdToken();
+      userToken = token;
+      closeLoginModal();
+      showToast('🎉 เข้าสู่ระบบสำเร็จ!', 'success');
+    } catch (error) {
+      showToast('❌ Login ไม่สำเร็จ', 'error');
+      console.error(error);
+    }
+  };
+
+  window.firebaseLogout = async () => {
+    await signOut(auth);
+    showToast('👋 ออกจากระบบแล้ว', 'info');
+    switchPage('upload');
+  };
+</script>
+
+<script>
+const API_URL =
+  (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? `${location.protocol}//${location.hostname}:8000`
+    : "https://coinlens-production.up.railway.app";
+
+// ─── State ────────────────────────────────────────
+let userToken = null;
+let isLoggedIn = false;
+let currentResult = null;
+let history = [];
+let selectedIds = new Set();
+let allSelected = false;
+let fileObjectURL = null;
+let isSaving = false;
+
+// ─── Page Switching ────────────────────────────────
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('tab-' + page).classList.add('active');
+
+  if (page === 'history') {
+    if (!isLoggedIn) { showLoginModal(); return; }
+    renderHistory();
+  }
+}
+
+// ─── File Handling ─────────────────────────────────
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.add('drag');
+}
+
+function handleDragLeave(e) {
+  document.getElementById('dropzone').classList.remove('drag');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) processImage(file);
+}
+
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (file) processImage(file);
+}
+
+function openCamera() {
+  document.getElementById('camera-input').click();
+}
+
+// ลบ processImage เก่าออกทั้งหมด เหลือแค่อันนี้
+async function processImage(file) {
+    if (fileObjectURL) URL.revokeObjectURL(fileObjectURL);
+    fileObjectURL = URL.createObjectURL(file);
+
+    const img = document.getElementById('preview-img');
+    img.src = fileObjectURL;
+
+    document.getElementById('preview-panel').classList.add('show');
+    document.getElementById('total-val').textContent = '—';
+    document.getElementById('coin-breakdown').innerHTML = '';
+    document.getElementById('result-actions').style.display = 'none';
+    document.getElementById('label-overlay').innerHTML = '';
+    document.getElementById('processing-overlay').classList.add('show');
+
+    // ส่งรูปไป Backend จริง
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+        const response = await fetch(`${API_URL}/predict`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) throw new Error('API Error');
+
+        const data = await response.json();
+        document.getElementById('processing-overlay').classList.remove('show');
+        if (data.annotated_image_base64) {
+          const mime = data.annotated_image_mime || 'image/png';
+          img.src = `data:${mime};base64,${data.annotated_image_base64}`;
+          // เก็บ data URL ไว้ใช้เป็น thumbnail ใน history
+          data.thumb = img.src;
+        }
+        showDemoResult(data);
+
+    } catch (error) {
+        document.getElementById('processing-overlay').classList.remove('show');
+        showToast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่', 'error');
+        console.error(error);
+    }
+}
+
+// ─── Demo Result ────────────────────────────────────
+function showDemoResult(data) {
+    // ใช้ data จาก API แทน random
+    const coinDefs = {
+        '025': { value: 0.25, label:'0.25 บาท', badgeClass:'b025' },
+        '050': { value: 0.50, label:'0.50 บาท', badgeClass:'b050' },
+        '1':   { value: 1.00, label:'1 บาท',    badgeClass:'b1' },
+        '2':   { value: 2.00, label:'2 บาท',    badgeClass:'b2' },
+        '5':   { value: 5.00, label:'5 บาท',    badgeClass:'b5' },
+        '10':  { value: 10.0, label:'10 บาท',   badgeClass:'b10' },
+    };
+
+    document.getElementById('total-val').textContent = data.total.toFixed(2);
+
+    const bd = document.getElementById('coin-breakdown');
+    bd.innerHTML = '';
+    Object.entries(data.coins)
+        .sort(([a],[b]) => (coinDefs[a]?.value ?? parseFloat(a)) - (coinDefs[b]?.value ?? parseFloat(b)))
+        .forEach(([val, count]) => {
+        const def = coinDefs[val];
+        if (!def) return;
+        const subtotal = def.value * count;
+        bd.innerHTML += `
+          <div class="coin-row">
+            <div class="coin-badge ${def.badgeClass}">${def.value}฿</div>
+            <div class="coin-row-name">${def.label}</div>
+            <div class="coin-row-count">${count} เหรียญ</div>
+            <div class="coin-row-val">${subtotal.toFixed(2)}</div>
+          </div>`;
+    });
+
+    document.getElementById('result-actions').style.display = 'flex';
+    document.getElementById('result-actions').style.flexDirection = 'column';
+    currentResult = {
+      coins: data.coins,
+      total: data.total,
+      date: new Date().toLocaleString('th-TH'),
+      thumb: data.thumb || document.getElementById('preview-img').src || null,
+    };
+    showToast('✅ วิเคราะห์เหรียญสำเร็จ!', 'success');
+}
+
+// ─── Save Result (persist to backend) ─────────────────
+async function saveResult() {
+  if (!isLoggedIn) { showLoginModal(); return; }
+  if (!currentResult) return;
+  if (isSaving) return;
+
+  if (!userToken) {
+    showToast('❌ ไม่พบโทเค็นผู้ใช้ ลอง login ใหม่อีกครั้ง', 'error');
+    return;
+  }
+
+  const btnSave = document.querySelector('#result-actions .btn-save');
+  let success = false;
+
+  try {
+    isSaving = true;
+    if (btnSave) {
+      btnSave.disabled = true;
+      btnSave.innerHTML = '<span class="btn-loader"></span>กำลังบันทึก...';
+    }
+
+    const resp = await fetch(`${API_URL}/history`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        total: currentResult.total,
+        coins: currentResult.coins,
+        thumb: currentResult.thumb || null,
+      }),
+    });
+
+    if (!resp.ok) throw new Error('Failed to save history');
+
+    const created = await resp.json();
+
+    // map แถวที่สร้างจาก backend มาเก็บใน history ทันที (ไม่ต้องโหลดใหม่ทั้งก้อน)
+    const mapped = {
+      id: created.id,
+      date: created.scanned_at || new Date().toLocaleString('th-TH'),
+      total: created.total_value,
+      coins: {
+        '025': created.coin_025 ?? 0,
+        '050': created.coin_050 ?? 0,
+        '1':   created.coin_1   ?? 0,
+        '2':   created.coin_2   ?? 0,
+        '5':   created.coin_5   ?? 0,
+        '10':  created.coin_10  ?? 0,
+      },
+      thumb: created.thumb || currentResult.thumb || null,
+    };
+    history.unshift(mapped);
+
+    success = true;
+    showToast('💾 บันทึกผลลัพธ์เรียบร้อยแล้ว', 'success');
+    if (btnSave) {
+      btnSave.disabled = true;
+      btnSave.textContent = '✅ บันทึกแล้ว';
+    }
+
+    // แค่ redraw จาก state ใน memory ให้รู้สึกเร็วขึ้น
+    renderHistoryGrid();
+  } catch (error) {
+    console.error(error);
+    showToast('❌ บันทึกไม่สำเร็จ กรุณาลองใหม่', 'error');
+  } finally {
+    isSaving = false;
+    if (!success && btnSave) {
+      btnSave.disabled = false;
+      btnSave.textContent = '💾 บันทึกผลลัพธ์';
+    }
+  }
+}
+
+function resetUpload() {
+  document.getElementById('preview-panel').classList.remove('show');
+  document.getElementById('file-input').value = '';
+  currentResult = null;
+  const btnSave = document.querySelector('#result-actions .btn-save');
+  if (btnSave) {
+    btnSave.disabled = false;
+    btnSave.textContent = '💾 บันทึกผลลัพธ์';
+  }
+}
+
+// ─── History (load from backend) ────────────────────
+async function renderHistory() {
+  const grid = document.getElementById('history-grid');
+
+  if (!isLoggedIn) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <span class="icon">🔐</span>
+      <h3>กรุณาเข้าสู่ระบบก่อนดูประวัติ</h3>
+    </div>`;
+    return;
+  }
+
+  if (!userToken) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <span class="icon">⏳</span>
+      <h3>กำลังเตรียมข้อมูลผู้ใช้...</h3>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+    <span class="icon">⏳</span>
+    <h3>กำลังโหลดประวัติ...</h3>
+  </div>`;
+
+  try {
+    const resp = await fetch(`${API_URL}/history`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${userToken}`,
+      },
+    });
+
+    if (!resp.ok) throw new Error('Failed to load history');
+
+    const records = await resp.json();
+
+    history = (records || []).map(r => ({
+      id: r.id,
+      date: r.scanned_at || new Date().toLocaleString('th-TH'),
+      total: r.total_value,
+      coins: {
+        '025': r.coin_025 ?? 0,
+        '050': r.coin_050 ?? 0,
+        '1':   r.coin_1   ?? 0,
+        '2':   r.coin_2   ?? 0,
+        '5':   r.coin_5   ?? 0,
+        '10':  r.coin_10  ?? 0,
+      },
+      thumb: r.thumb || null,
+    }));
+  } catch (error) {
+    console.error(error);
+    showToast('❌ โหลดประวัติไม่สำเร็จ', 'error');
+    history = [];
+  }
+  // หลังโหลดเสร็จ ค่อย render จาก state ใน memory
+  renderHistoryGrid();
+}
+
+// วาดหน้า history จากตัวแปร history และ selectedIds โดยไม่เรียก API ซ้ำ
+function renderHistoryGrid() {
+  const grid = document.getElementById('history-grid');
+  const all = [...history];
+
+  if (all.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <span class="icon">🪙</span>
+      <h3>ยังไม่มีประวัติ</h3>
+      <p>เริ่มนับเหรียญแล้วบันทึกผล</p>
+    </div>`;
+    document.getElementById('selected-count').textContent = '0';
+    document.getElementById('merge-btn').disabled = true;
+    const delBtn = document.getElementById('delete-btn');
+    if (delBtn) {
+      delBtn.disabled = true;
+      document.getElementById('delete-count').textContent = '0';
+    }
+    return;
+  }
+
+  grid.innerHTML = all.map(h => `
+    <div class="history-card ${selectedIds.has(h.id) ? 'selected' : ''}" onclick="toggleSelect('${h.id}')">
+      <div class="check">${selectedIds.has(h.id) ? '✓' : ''}</div>
+      <img class="history-thumb"
+           src="${h.thumb || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22160%22><rect fill=%22%2305050a%22 width=%22400%22 height=%22160%22/><text x=%22200%22 y=%2290%22 fill=%22%23333%22 text-anchor=%22middle%22 font-size=%2248%22>🪙</text></svg>'}"
+           alt="coin photo">
+      <div class="history-body">
+        <div class="date">📅 ${h.date}</div>
+        <div class="amount">฿${h.total.toFixed(2)}</div>
+        <div class="coins-summary">${Object.entries(h.coins).filter(([,v])=>v>0).map(([k,v])=>`${k}฿×${v}`).join(' · ')}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('selected-count').textContent = selectedIds.size;
+  document.getElementById('merge-btn').disabled = selectedIds.size < 2;
+  const delBtn = document.getElementById('delete-btn');
+  if (delBtn) {
+    delBtn.disabled = selectedIds.size === 0;
+    document.getElementById('delete-count').textContent = selectedIds.size;
+  }
+}
+
+function toggleSelect(id) {
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  renderHistoryGrid();
+}
+
+function toggleSelectAll() {
+  const all = [...history];
+  allSelected = !allSelected;
+  selectedIds = allSelected ? new Set(all.map(h=>h.id)) : new Set();
+  renderHistoryGrid();
+}
+
+// ─── Delete Selected History ───────────────────────
+async function deleteSelected() {
+  if (!isLoggedIn) { showLoginModal(); return; }
+  if (selectedIds.size === 0) return;
+  if (!userToken) {
+    showToast('❌ ไม่พบโทเค็นผู้ใช้ ลอง login ใหม่อีกครั้ง', 'error');
+    return;
+  }
+
+  const confirmDelete = window.confirm(`ลบประวัติที่เลือก ${selectedIds.size} รายการหรือไม่?`);
+  if (!confirmDelete) return;
+
+  try {
+    const resp = await fetch(`${API_URL}/history`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({ ids: Array.from(selectedIds) }),
+    });
+
+    if (!resp.ok) throw new Error('Failed to delete history');
+
+    showToast('🗑️ ลบประวัติที่เลือกแล้ว', 'success');
+    selectedIds = new Set();
+    allSelected = false;
+    await renderHistory();
+  } catch (error) {
+    console.error(error);
+    showToast('❌ ลบประวัติไม่สำเร็จ กรุณาลองใหม่', 'error');
+  }
+}
+
+// ─── Merge Modal ────────────────────────────────────
+function showMergeModal() {
+  const all = [...history];
+  const selected = all.filter(h => selectedIds.has(h.id));
+
+  let grandTotal = 0;
+  const coinTotals = {'025':0, '050':0, '1':0, '2':0, '5':0, '10':0};
+
+  selected.forEach(h => {
+    grandTotal += h.total;
+    Object.entries(h.coins).forEach(([k,v]) => {
+      if (coinTotals[k] !== undefined) coinTotals[k] += v;
+    });
+  });
+
+  document.getElementById('merge-rounds').textContent = `${selected.length} รอบ`;
+  document.getElementById('merge-total-val').textContent = grandTotal.toFixed(2);
+
+  const coinLabels = {
+    '025':'เหรียญ 0.25 บาท',
+    '050':'เหรียญ 0.50 บาท',
+    '1':'เหรียญ 1 บาท',
+    '2':'เหรียญ 2 บาท',
+    '5':'เหรียญ 5 บาท',
+    '10':'เหรียญ 10 บาท'
+  };
+  const coinBadge = {'025':'b025', '050':'b050', '1':'b1', '2':'b2', '5':'b5', '10':'b10'};
+  const bd = document.getElementById('merge-breakdown');
+  const coinValues = {'025':0.25, '050':0.5, '1':1, '2':2, '5':5, '10':10};
+  bd.innerHTML = Object.entries(coinTotals)
+    .sort(([a],[b]) => coinValues[a] - coinValues[b])
+    .map(([k,v]) => `
+    <div class="merge-item">
+      <div class="coin-badge ${coinBadge[k]}" style="width:28px;height:28px;font-size:.7rem">${k}฿</div>
+      <div>
+        <div class="num">${v} เหรียญ</div>
+        <div style="font-size:.75rem;color:var(--muted)">${coinLabels[k]}</div>
+      </div>
+      <div class="val">฿${(coinValues[k]*v).toFixed(2)}</div>
+    </div>`).join('');
+
+  document.getElementById('merge-modal').classList.add('show');
+}
+
+function closeMergeModal() {
+  document.getElementById('merge-modal').classList.remove('show');
+}
+
+// ─── Login ───────────────────────────────────────────
+function showLoginModal() {
+  document.getElementById('login-modal').classList.add('show');
+}
+
+function closeLoginModal() {
+  document.getElementById('login-modal').classList.remove('show');
+}
+
+function loginGoogle() {
+  window.firebaseLoginGoogle();
+}
+
+function logout() {
+  window.firebaseLogout();
+}
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(m => {
+  m.addEventListener('click', e => {
+    if (e.target === m) {
+      m.classList.remove('show');
+    }
+  });
+});
+
+// ─── Toast ────────────────────────────────────────────
+function showToast(msg, type='info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+</script>
+</body>
+</html>

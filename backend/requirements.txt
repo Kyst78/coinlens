@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-multipart
+filetype
+slowapi
+supabase
+python-dotenv
+ultralytics
+Pillow
