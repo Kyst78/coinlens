@@ -3,3 +3,7 @@ node_modules
 *.log
 .git
 backend/serviceAccountKey.json
+backend/venv
+backend/__pycache__
+**/__pycache__
+*.pyc
