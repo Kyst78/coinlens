@@ -1096,7 +1096,9 @@ const HistoryCache = {
 
   set(records) {
     try {
-      sessionStorage.setItem(this.KEY, JSON.stringify(records));
+      // ไม่เก็บ thumb ใน cache เพราะ base64 ใหญ่มาก เกิน sessionStorage quota
+      const slim = records.map(r => ({ ...r, thumb: null }));
+      sessionStorage.setItem(this.KEY, JSON.stringify(slim));
       sessionStorage.setItem(this.TS_KEY, Date.now().toString());
       this._updateStatus('fresh');
     } catch (e) {
