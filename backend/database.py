@@ -34,9 +34,12 @@ def save_scan(user_id: str, result: dict) -> dict:
 def get_history(user_id: str) -> list:
     return (
         supabase.table("scan_history")
-        .select("*")
+        .select(
+            "id, firebase_uid, total_value, coin_025, coin_050, coin_1, coin_2, coin_5, coin_10, thumb, scanned_at"
+        )
         .eq("firebase_uid", user_id)
         .order("scanned_at", desc=True)
+        .limit(100)
         .execute()
         .data
     )
