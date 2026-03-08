@@ -50,7 +50,13 @@ app.add_middleware(
 
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["localhost", "127.0.0.1", "*.railway.app"]  # ← เพิ่ม railway
+    allowed_hosts=[
+        "localhost",
+        "127.0.0.1",
+        "*.railway.app",
+        "*.up.railway.app",  # coinlens-production.up.railway.app
+        "coinlens-production.up.railway.app",
+    ],
 )
 
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp"}
@@ -83,8 +89,11 @@ async def validate_image(file: UploadFile) -> bytes:
 
 
 def run_yolo(image_bytes: bytes) -> dict:
-    image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    results = model(image, conf=0.6)[0]
+    try:
+        image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        results = model(image, conf=0.6)[0]
+    except Exception:
+        raise HTTPException(400, "Failed to process image")
 
     counts = {k: 0 for k in COIN_VALUES.keys()}
     total_value = 0.0
@@ -159,8 +168,12 @@ async def save_history_endpoint(
                 iv = 0
             clean_coins[k] = iv
 
+    recomputed_total = 0.0
+    for coin, count in clean_coins.items():
+        recomputed_total += COIN_VALUES[coin] * float(count)
+
     safe_result = {
-        "total": float(result.total),
+        "total": round(float(recomputed_total), 2),
         "coins": clean_coins,
         "thumb": result.thumb,
     }
