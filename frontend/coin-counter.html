@@ -31,7 +31,6 @@
     overflow-x: hidden;
   }
 
-  /* ─── Background ─── */
   body::before {
     content: '';
     position: fixed;
@@ -43,7 +42,6 @@
     z-index: 0;
   }
 
-  /* ─── Navbar ─── */
   nav {
     position: sticky;
     top: 0;
@@ -115,7 +113,6 @@
     gap: .75rem;
   }
 
-  /* ─── Login Button ─── */
   .btn-login {
     display: flex;
     align-items: center;
@@ -152,11 +149,9 @@
 
   .avatar:hover { border-color: var(--gold); }
 
-  /* ─── Pages ─── */
   .page { display: none; }
   .page.active { display: block; }
 
-  /* ─── Upload Page ─── */
   .upload-page {
     max-width: 1100px;
     margin: 0 auto;
@@ -189,7 +184,6 @@
     font-size: 1.05rem;
   }
 
-  /* ─── Upload Zone ─── */
   .upload-area {
     border: 2px dashed var(--border);
     border-radius: 20px;
@@ -284,7 +278,6 @@
     transform: translateY(-1px);
   }
 
-  /* ─── Preview Panel ─── */
   .preview-panel {
     display: none;
     margin-top: 2rem;
@@ -309,7 +302,6 @@
     background: #05050a;
   }
 
-  /* Labels overlay */
   .label-overlay {
     position: absolute;
     inset: 0;
@@ -338,7 +330,6 @@
     font-family: 'Space Mono', monospace;
   }
 
-  /* ─── Result Card ─── */
   .result-card {
     background: var(--surface);
     border-radius: 16px;
@@ -457,7 +448,6 @@
 
   .btn-new:hover { border-color: var(--text); color: var(--text); }
 
-  /* ─── Processing Overlay ─── */
   .processing {
     display: none;
     position: absolute;
@@ -486,7 +476,6 @@
 
   .processing p { color: var(--muted); font-size: .9rem; }
 
-  /* ─── History Page ─── */
   .history-page {
     max-width: 1100px;
     margin: 0 auto;
@@ -503,6 +492,33 @@
   }
 
   .page-header h2 { font-size: 1.5rem; font-weight: 700; }
+
+  /* cache status indicator */
+  .cache-status {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .75rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    padding: .25rem .6rem;
+    border-radius: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    transition: all .3s;
+  }
+
+  .cache-status.fresh { color: var(--success); border-color: rgba(61,214,140,.2); }
+  .cache-status.stale { color: var(--gold); border-color: rgba(245,200,66,.2); }
+  .cache-status .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .cache-status.refreshing .dot {
+    animation: pulse .8s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
   .history-toolbar {
     display: flex;
@@ -549,7 +565,6 @@
 
   .btn-merge:not(:disabled):hover { transform: translateY(-1px); }
 
-  /* ─── History Grid ─── */
   .history-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -619,7 +634,6 @@
     color: var(--muted);
   }
 
-  /* ─── Merge Modal ─── */
   .modal-backdrop {
     display: none;
     position: fixed;
@@ -745,7 +759,6 @@
 
   .btn-cancel:hover { border-color: var(--text); color: var(--text); }
 
-  /* ─── Login Modal ─── */
   .login-modal-content {
     text-align: center;
   }
@@ -778,7 +791,6 @@
   }
 
   .btn-google:hover { border-color: #4285f4; background: rgba(66,133,244,.08); color: #4285f4; }
-
   .btn-google svg { width: 20px; height: 20px; }
 
   .login-note {
@@ -787,7 +799,6 @@
     color: var(--muted);
   }
 
-  /* ─── Toast ─── */
   .toast-container {
     position: fixed;
     bottom: 2rem;
@@ -813,7 +824,6 @@
 
   @keyframes toastIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
 
-  /* ─── Empty State ─── */
   .empty-state {
     text-align: center;
     padding: 5rem 2rem;
@@ -824,7 +834,6 @@
   .empty-state h3 { font-size: 1.1rem; color: var(--text); margin-bottom: .5rem; }
   .empty-state p { font-size: .9rem; }
 
-  /* ─── Responsive ─── */
   @media (max-width: 720px) {
     .preview-panel.show { grid-template-columns: 1fr; }
     .hero-text h1 { font-size: 2rem; }
@@ -835,7 +844,6 @@
 </head>
 <body>
 
-<!-- Navbar -->
 <nav>
   <a class="nav-logo" href="#" onclick="switchPage('upload')">
     <div class="coin-icon">฿</div>
@@ -869,7 +877,6 @@
       <p>อัปโหลดรูปกองเหรียญ — AI วิเคราะห์และรวมมูลค่าให้ทันที</p>
     </div>
 
-    <!-- Upload Zone -->
     <div class="upload-area" id="dropzone"
          ondragover="handleDragOver(event)"
          ondragleave="handleDragLeave(event)"
@@ -890,21 +897,16 @@
     <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFile(event)">
     <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="handleFile(event)">
 
-    <!-- Preview + Result -->
     <div class="preview-panel" id="preview-panel">
-      <!-- Image Box -->
       <div class="preview-image-box">
         <img src="" id="preview-img" alt="preview">
-        <!-- Label overlay (demo) -->
         <div class="label-overlay" id="label-overlay"></div>
-        <!-- Processing overlay -->
         <div class="processing" id="processing-overlay">
           <div class="spinner"></div>
           <p>กำลังวิเคราะห์เหรียญ...</p>
         </div>
       </div>
 
-      <!-- Result Card -->
       <div class="result-card" id="result-card">
         <h3>📊 ผลการนับ</h3>
 
@@ -914,9 +916,7 @@
           <div class="unit">บาท</div>
         </div>
 
-        <div class="coin-breakdown" id="coin-breakdown">
-          <!-- Filled by JS -->
-        </div>
+        <div class="coin-breakdown" id="coin-breakdown"></div>
 
         <div class="result-actions" id="result-actions" style="display:none">
           <button class="btn-save" onclick="saveResult()">💾 บันทึกผลลัพธ์</button>
@@ -931,7 +931,13 @@
 <div class="page" id="page-history">
   <div class="history-page">
     <div class="page-header">
-      <h2>ประวัติการนับ</h2>
+      <div style="display:flex; align-items:center; gap:.75rem; flex-wrap:wrap;">
+        <h2>ประวัติการนับ</h2>
+        <span class="cache-status" id="cache-status">
+          <span class="dot"></span>
+          <span id="cache-status-text">—</span>
+        </span>
+      </div>
       <div class="history-toolbar">
         <button class="select-all-btn" onclick="toggleSelectAll()">เลือกทั้งหมด</button>
         <button class="btn-merge" id="merge-btn" disabled onclick="showMergeModal()">
@@ -943,9 +949,7 @@
       </div>
     </div>
 
-    <div class="history-grid" id="history-grid">
-      <!-- Filled by JS -->
-    </div>
+    <div class="history-grid" id="history-grid"></div>
   </div>
 </div>
 
@@ -993,7 +997,6 @@
   </div>
 </div>
 
-<!-- Toast Container -->
 <div class="toast-container" id="toast-container"></div>
 
 <!-- Firebase SDK -->
@@ -1002,44 +1005,45 @@
   import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
 
-  // ใส่ config ที่ได้จาก Firebase Console
- const firebaseConfig = {
-  apiKey: "AIzaSyBdvJIFeeW2ILZTZonbL-U57BuqKYdQXv8",
-  authDomain: "coinlens-6c270.firebaseapp.com",
-  projectId: "coinlens-6c270",
-  storageBucket: "coinlens-6c270.firebasestorage.app",
-  messagingSenderId: "1029884991812",
-  appId: "1:1029884991812:web:d7b5a0c3a1fe34a0649f11",
-  measurementId: "G-T9YDVNX601"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyBdvJIFeeW2ILZTZonbL-U57BuqKYdQXv8",
+    authDomain: "coinlens-6c270.firebaseapp.com",
+    projectId: "coinlens-6c270",
+    storageBucket: "coinlens-6c270.firebasestorage.app",
+    messagingSenderId: "1029884991812",
+    appId: "1:1029884991812:web:d7b5a0c3a1fe34a0649f11",
+    measurementId: "G-T9YDVNX601"
+  };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
-  // ตรวจสอบสถานะ login อัตโนมัติ
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // login อยู่
       isLoggedIn = true;
       userToken = null;
-      user.getIdToken().then(token => { userToken = token; });
+      const token = await user.getIdToken();
+      userToken = token;
 
       document.getElementById('guest-btns').style.display = 'none';
       const ub = document.getElementById('user-btns');
       ub.style.display = 'flex';
       document.getElementById('user-name').textContent = user.displayName?.split(' ')[0] || 'User';
       document.querySelector('.avatar').textContent = (user.displayName?.[0] || 'U').toUpperCase();
+
+      // ── PRELOAD: ดึง history ใน background ทันทีที่ login ──
+      preloadHistory(token);
+
     } else {
-      // ยังไม่ได้ login
       isLoggedIn = false;
       userToken = null;
+      HistoryCache.clear(); // ล้าง cache ตอน logout
       document.getElementById('user-btns').style.display = 'none';
       document.getElementById('guest-btns').style.display = '';
     }
   });
 
-  // ผูก function กับ window เพื่อให้ script เดิมเรียกได้
   window.firebaseLoginGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
@@ -1075,6 +1079,109 @@ let selectedIds = new Set();
 let allSelected = false;
 let fileObjectURL = null;
 let isSaving = false;
+
+// ─── Cache Layer ──────────────────────────────────
+// ใช้ sessionStorage: ข้อมูลอยู่ตลอด session (ปิด tab = ล้าง)
+const HistoryCache = {
+  KEY: 'coinlens_history',
+  TS_KEY: 'coinlens_history_ts',
+  TTL: 5 * 60 * 1000, // refresh ทุก 5 นาที
+
+  get() {
+    try {
+      const raw = sessionStorage.getItem(this.KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  },
+
+  set(records) {
+    try {
+      sessionStorage.setItem(this.KEY, JSON.stringify(records));
+      sessionStorage.setItem(this.TS_KEY, Date.now().toString());
+      this._updateStatus('fresh');
+    } catch (e) {
+      console.warn('Cache write failed:', e);
+    }
+  },
+
+  prepend(record) {
+    const current = this.get() || [];
+    this.set([record, ...current]);
+  },
+
+  removeByIds(ids) {
+    const current = this.get();
+    if (!current) return;
+    this.set(current.filter(r => !ids.has(r.id)));
+  },
+
+  clear() {
+    sessionStorage.removeItem(this.KEY);
+    sessionStorage.removeItem(this.TS_KEY);
+    this._updateStatus('—');
+  },
+
+  isStale() {
+    const ts = sessionStorage.getItem(this.TS_KEY);
+    if (!ts) return true;
+    return (Date.now() - parseInt(ts)) > this.TTL;
+  },
+
+  _updateStatus(state) {
+    const el = document.getElementById('cache-status');
+    const txt = document.getElementById('cache-status-text');
+    if (!el || !txt) return;
+    el.className = 'cache-status';
+    if (state === 'fresh') {
+      el.classList.add('fresh');
+      txt.textContent = 'ข้อมูลล่าสุด';
+    } else if (state === 'stale') {
+      el.classList.add('stale');
+      txt.textContent = 'กำลังอัปเดต...';
+      el.classList.add('refreshing');
+    } else if (state === 'cached') {
+      el.classList.add('fresh');
+      txt.textContent = 'จาก cache';
+    } else {
+      txt.textContent = '—';
+    }
+  }
+};
+
+// ─── Preload (เรียกหลัง login ทันที) ──────────────
+async function preloadHistory(token) {
+  try {
+    const records = await fetchHistoryFromAPI(token);
+    HistoryCache.set(records);
+    history = records; // อัปเดต state ด้วย
+  } catch (e) {
+    console.warn('Preload history failed:', e);
+  }
+}
+
+// ─── Fetch จาก API ───────────────────────────────
+async function fetchHistoryFromAPI(token) {
+  const resp = await fetch(`${API_URL}/history`, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!resp.ok) throw new Error('Failed to load history');
+  const records = await resp.json();
+  return (records || []).map(r => ({
+    id: r.id,
+    date: r.scanned_at || new Date().toLocaleString('th-TH'),
+    total: r.total_value,
+    coins: {
+      '025': r.coin_025 ?? 0,
+      '050': r.coin_050 ?? 0,
+      '1':   r.coin_1   ?? 0,
+      '2':   r.coin_2   ?? 0,
+      '5':   r.coin_5   ?? 0,
+      '10':  r.coin_10  ?? 0,
+    },
+    thumb: r.thumb || null,
+  }));
+}
 
 // ─── Page Switching ────────────────────────────────
 function switchPage(page) {
@@ -1115,93 +1222,89 @@ function openCamera() {
   document.getElementById('camera-input').click();
 }
 
-// ลบ processImage เก่าออกทั้งหมด เหลือแค่อันนี้
 async function processImage(file) {
-    if (fileObjectURL) URL.revokeObjectURL(fileObjectURL);
-    fileObjectURL = URL.createObjectURL(file);
+  if (fileObjectURL) URL.revokeObjectURL(fileObjectURL);
+  fileObjectURL = URL.createObjectURL(file);
 
-    const img = document.getElementById('preview-img');
-    img.src = fileObjectURL;
+  const img = document.getElementById('preview-img');
+  img.src = fileObjectURL;
 
-    document.getElementById('preview-panel').classList.add('show');
-    document.getElementById('total-val').textContent = '—';
-    document.getElementById('coin-breakdown').innerHTML = '';
-    document.getElementById('result-actions').style.display = 'none';
-    document.getElementById('label-overlay').innerHTML = '';
-    document.getElementById('processing-overlay').classList.add('show');
+  document.getElementById('preview-panel').classList.add('show');
+  document.getElementById('total-val').textContent = '—';
+  document.getElementById('coin-breakdown').innerHTML = '';
+  document.getElementById('result-actions').style.display = 'none';
+  document.getElementById('label-overlay').innerHTML = '';
+  document.getElementById('processing-overlay').classList.add('show');
 
-    // ส่งรูปไป Backend จริง
-    const formData = new FormData();
-    formData.append('image', file);
+  const formData = new FormData();
+  formData.append('image', file);
 
-    try {
-        const response = await fetch(`${API_URL}/predict`, {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) throw new Error('API Error');
-
-        const data = await response.json();
-        document.getElementById('processing-overlay').classList.remove('show');
-        if (data.annotated_image_base64) {
-          const mime = data.annotated_image_mime || 'image/png';
-          img.src = `data:${mime};base64,${data.annotated_image_base64}`;
-          // เก็บ data URL ไว้ใช้เป็น thumbnail ใน history
-          data.thumb = img.src;
-        }
-        showDemoResult(data);
-
-    } catch (error) {
-        document.getElementById('processing-overlay').classList.remove('show');
-        showToast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่', 'error');
-        console.error(error);
-    }
-}
-
-// ─── Demo Result ────────────────────────────────────
-function showDemoResult(data) {
-    // ใช้ data จาก API แทน random
-    const coinDefs = {
-        '025': { value: 0.25, label:'0.25 บาท', badgeClass:'b025' },
-        '050': { value: 0.50, label:'0.50 บาท', badgeClass:'b050' },
-        '1':   { value: 1.00, label:'1 บาท',    badgeClass:'b1' },
-        '2':   { value: 2.00, label:'2 บาท',    badgeClass:'b2' },
-        '5':   { value: 5.00, label:'5 บาท',    badgeClass:'b5' },
-        '10':  { value: 10.0, label:'10 บาท',   badgeClass:'b10' },
-    };
-
-    document.getElementById('total-val').textContent = data.total.toFixed(2);
-
-    const bd = document.getElementById('coin-breakdown');
-    bd.innerHTML = '';
-    Object.entries(data.coins)
-        .sort(([a],[b]) => (coinDefs[a]?.value ?? parseFloat(a)) - (coinDefs[b]?.value ?? parseFloat(b)))
-        .forEach(([val, count]) => {
-        const def = coinDefs[val];
-        if (!def) return;
-        const subtotal = def.value * count;
-        bd.innerHTML += `
-          <div class="coin-row">
-            <div class="coin-badge ${def.badgeClass}">${def.value}฿</div>
-            <div class="coin-row-name">${def.label}</div>
-            <div class="coin-row-count">${count} เหรียญ</div>
-            <div class="coin-row-val">${subtotal.toFixed(2)}</div>
-          </div>`;
+  try {
+    const response = await fetch(`${API_URL}/predict`, {
+      method: 'POST',
+      body: formData
     });
 
-    document.getElementById('result-actions').style.display = 'flex';
-    document.getElementById('result-actions').style.flexDirection = 'column';
-    currentResult = {
-      coins: data.coins,
-      total: data.total,
-      date: new Date().toLocaleString('th-TH'),
-      thumb: data.thumb || document.getElementById('preview-img').src || null,
-    };
-    showToast('✅ วิเคราะห์เหรียญสำเร็จ!', 'success');
+    if (!response.ok) throw new Error('API Error');
+
+    const data = await response.json();
+    document.getElementById('processing-overlay').classList.remove('show');
+    if (data.annotated_image_base64) {
+      const mime = data.annotated_image_mime || 'image/png';
+      img.src = `data:${mime};base64,${data.annotated_image_base64}`;
+      data.thumb = img.src;
+    }
+    showDemoResult(data);
+
+  } catch (error) {
+    document.getElementById('processing-overlay').classList.remove('show');
+    showToast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่', 'error');
+    console.error(error);
+  }
 }
 
-// ─── Save Result (persist to backend) ─────────────────
+// ─── Show Result ────────────────────────────────────
+function showDemoResult(data) {
+  const coinDefs = {
+    '025': { value: 0.25, label:'0.25 บาท', badgeClass:'b025' },
+    '050': { value: 0.50, label:'0.50 บาท', badgeClass:'b050' },
+    '1':   { value: 1.00, label:'1 บาท',    badgeClass:'b1' },
+    '2':   { value: 2.00, label:'2 บาท',    badgeClass:'b2' },
+    '5':   { value: 5.00, label:'5 บาท',    badgeClass:'b5' },
+    '10':  { value: 10.0, label:'10 บาท',   badgeClass:'b10' },
+  };
+
+  document.getElementById('total-val').textContent = data.total.toFixed(2);
+
+  const bd = document.getElementById('coin-breakdown');
+  bd.innerHTML = '';
+  Object.entries(data.coins)
+    .sort(([a],[b]) => (coinDefs[a]?.value ?? parseFloat(a)) - (coinDefs[b]?.value ?? parseFloat(b)))
+    .forEach(([val, count]) => {
+      const def = coinDefs[val];
+      if (!def) return;
+      const subtotal = def.value * count;
+      bd.innerHTML += `
+        <div class="coin-row">
+          <div class="coin-badge ${def.badgeClass}">${def.value}฿</div>
+          <div class="coin-row-name">${def.label}</div>
+          <div class="coin-row-count">${count} เหรียญ</div>
+          <div class="coin-row-val">${subtotal.toFixed(2)}</div>
+        </div>`;
+    });
+
+  document.getElementById('result-actions').style.display = 'flex';
+  document.getElementById('result-actions').style.flexDirection = 'column';
+  currentResult = {
+    coins: data.coins,
+    total: data.total,
+    date: new Date().toLocaleString('th-TH'),
+    thumb: data.thumb || document.getElementById('preview-img').src || null,
+  };
+  showToast('✅ วิเคราะห์เหรียญสำเร็จ!', 'success');
+}
+
+// ─── Save Result ─────────────────────────────────────
 async function saveResult() {
   if (!isLoggedIn) { showLoginModal(); return; }
   if (!currentResult) return;
@@ -1239,7 +1342,6 @@ async function saveResult() {
 
     const created = await resp.json();
 
-    // map แถวที่สร้างจาก backend มาเก็บใน history ทันที (ไม่ต้องโหลดใหม่ทั้งก้อน)
     const mapped = {
       id: created.id,
       date: created.scanned_at || new Date().toLocaleString('th-TH'),
@@ -1254,7 +1356,10 @@ async function saveResult() {
       },
       thumb: created.thumb || currentResult.thumb || null,
     };
+
+    // ── อัปเดต state + cache พร้อมกัน ──
     history.unshift(mapped);
+    HistoryCache.prepend(mapped);
 
     success = true;
     showToast('💾 บันทึกผลลัพธ์เรียบร้อยแล้ว', 'success');
@@ -1263,7 +1368,6 @@ async function saveResult() {
       btnSave.textContent = '✅ บันทึกแล้ว';
     }
 
-    // แค่ redraw จาก state ใน memory ให้รู้สึกเร็วขึ้น
     renderHistoryGrid();
   } catch (error) {
     console.error(error);
@@ -1288,7 +1392,7 @@ function resetUpload() {
   }
 }
 
-// ─── History (load from backend) ────────────────────
+// ─── History (Cache-First) ──────────────────────────
 async function renderHistory() {
   const grid = document.getElementById('history-grid');
 
@@ -1300,55 +1404,62 @@ async function renderHistory() {
     return;
   }
 
-  if (!userToken) {
+  const cached = HistoryCache.get();
+
+  if (cached) {
+    // ── มี cache: โชว์ทันทีเลย ──
+    history = cached;
+    HistoryCache._updateStatus('cached');
+    renderHistoryGrid();
+
+    // refresh ใน background ถ้า stale
+    if (HistoryCache.isStale() && userToken) {
+      refreshHistoryBackground();
+    }
+  } else {
+    // ── ไม่มี cache: โหลดครั้งแรก ──
+    if (!userToken) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+        <span class="icon">⏳</span>
+        <h3>กำลังเตรียมข้อมูลผู้ใช้...</h3>
+      </div>`;
+      return;
+    }
+
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
       <span class="icon">⏳</span>
-      <h3>กำลังเตรียมข้อมูลผู้ใช้...</h3>
+      <h3>กำลังโหลดประวัติ...</h3>
     </div>`;
-    return;
+
+    try {
+      const records = await fetchHistoryFromAPI(userToken);
+      HistoryCache.set(records);
+      history = records;
+    } catch (error) {
+      console.error(error);
+      showToast('❌ โหลดประวัติไม่สำเร็จ', 'error');
+      history = [];
+    }
+    renderHistoryGrid();
   }
-
-  grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-    <span class="icon">⏳</span>
-    <h3>กำลังโหลดประวัติ...</h3>
-  </div>`;
-
-  try {
-    const resp = await fetch(`${API_URL}/history`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${userToken}`,
-      },
-    });
-
-    if (!resp.ok) throw new Error('Failed to load history');
-
-    const records = await resp.json();
-
-    history = (records || []).map(r => ({
-      id: r.id,
-      date: r.scanned_at || new Date().toLocaleString('th-TH'),
-      total: r.total_value,
-      coins: {
-        '025': r.coin_025 ?? 0,
-        '050': r.coin_050 ?? 0,
-        '1':   r.coin_1   ?? 0,
-        '2':   r.coin_2   ?? 0,
-        '5':   r.coin_5   ?? 0,
-        '10':  r.coin_10  ?? 0,
-      },
-      thumb: r.thumb || null,
-    }));
-  } catch (error) {
-    console.error(error);
-    showToast('❌ โหลดประวัติไม่สำเร็จ', 'error');
-    history = [];
-  }
-  // หลังโหลดเสร็จ ค่อย render จาก state ใน memory
-  renderHistoryGrid();
 }
 
-// วาดหน้า history จากตัวแปร history และ selectedIds โดยไม่เรียก API ซ้ำ
+// refresh เงียบๆ ใน background ไม่กระทบ UX
+async function refreshHistoryBackground() {
+  if (!userToken) return;
+  HistoryCache._updateStatus('stale');
+  try {
+    const records = await fetchHistoryFromAPI(userToken);
+    HistoryCache.set(records);
+    history = records;
+    renderHistoryGrid(); // อัปเดต UI เงียบๆ
+  } catch (e) {
+    // ถ้า fail ก็ไม่เป็นไร มี cache อยู่แล้ว
+    HistoryCache._updateStatus('cached');
+  }
+}
+
+// วาดหน้า history จาก state ใน memory
 function renderHistoryGrid() {
   const grid = document.getElementById('history-grid');
   const all = [...history];
@@ -1404,7 +1515,7 @@ function toggleSelectAll() {
   renderHistoryGrid();
 }
 
-// ─── Delete Selected History ───────────────────────
+// ─── Delete Selected ────────────────────────────────
 async function deleteSelected() {
   if (!isLoggedIn) { showLoginModal(); return; }
   if (selectedIds.size === 0) return;
@@ -1416,6 +1527,8 @@ async function deleteSelected() {
   const confirmDelete = window.confirm(`ลบประวัติที่เลือก ${selectedIds.size} รายการหรือไม่?`);
   if (!confirmDelete) return;
 
+  const deletedIds = new Set(selectedIds);
+
   try {
     const resp = await fetch(`${API_URL}/history`, {
       method: 'DELETE',
@@ -1423,15 +1536,20 @@ async function deleteSelected() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${userToken}`,
       },
-      body: JSON.stringify({ ids: Array.from(selectedIds) }),
+      body: JSON.stringify({ ids: Array.from(deletedIds) }),
     });
 
     if (!resp.ok) throw new Error('Failed to delete history');
 
     showToast('🗑️ ลบประวัติที่เลือกแล้ว', 'success');
+
+    // ── อัปเดต state + cache พร้อมกัน ──
+    history = history.filter(h => !deletedIds.has(h.id));
+    HistoryCache.removeByIds(deletedIds);
+
     selectedIds = new Set();
     allSelected = false;
-    await renderHistory();
+    renderHistoryGrid();
   } catch (error) {
     console.error(error);
     showToast('❌ ลบประวัติไม่สำเร็จ กรุณาลองใหม่', 'error');
@@ -1457,27 +1575,24 @@ function showMergeModal() {
   document.getElementById('merge-total-val').textContent = grandTotal.toFixed(2);
 
   const coinLabels = {
-    '025':'เหรียญ 0.25 บาท',
-    '050':'เหรียญ 0.50 บาท',
-    '1':'เหรียญ 1 บาท',
-    '2':'เหรียญ 2 บาท',
-    '5':'เหรียญ 5 บาท',
-    '10':'เหรียญ 10 บาท'
+    '025':'เหรียญ 0.25 บาท', '050':'เหรียญ 0.50 บาท',
+    '1':'เหรียญ 1 บาท', '2':'เหรียญ 2 บาท',
+    '5':'เหรียญ 5 บาท', '10':'เหรียญ 10 บาท'
   };
   const coinBadge = {'025':'b025', '050':'b050', '1':'b1', '2':'b2', '5':'b5', '10':'b10'};
-  const bd = document.getElementById('merge-breakdown');
   const coinValues = {'025':0.25, '050':0.5, '1':1, '2':2, '5':5, '10':10};
+  const bd = document.getElementById('merge-breakdown');
   bd.innerHTML = Object.entries(coinTotals)
     .sort(([a],[b]) => coinValues[a] - coinValues[b])
     .map(([k,v]) => `
-    <div class="merge-item">
-      <div class="coin-badge ${coinBadge[k]}" style="width:28px;height:28px;font-size:.7rem">${k}฿</div>
-      <div>
-        <div class="num">${v} เหรียญ</div>
-        <div style="font-size:.75rem;color:var(--muted)">${coinLabels[k]}</div>
-      </div>
-      <div class="val">฿${(coinValues[k]*v).toFixed(2)}</div>
-    </div>`).join('');
+      <div class="merge-item">
+        <div class="coin-badge ${coinBadge[k]}" style="width:28px;height:28px;font-size:.7rem">${k}฿</div>
+        <div>
+          <div class="num">${v} เหรียญ</div>
+          <div style="font-size:.75rem;color:var(--muted)">${coinLabels[k]}</div>
+        </div>
+        <div class="val">฿${(coinValues[k]*v).toFixed(2)}</div>
+      </div>`).join('');
 
   document.getElementById('merge-modal').classList.add('show');
 }
@@ -1503,12 +1618,9 @@ function logout() {
   window.firebaseLogout();
 }
 
-// Close modals on backdrop click
 document.querySelectorAll('.modal-backdrop').forEach(m => {
   m.addEventListener('click', e => {
-    if (e.target === m) {
-      m.classList.remove('show');
-    }
+    if (e.target === m) m.classList.remove('show');
   });
 });
 
