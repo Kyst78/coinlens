@@ -25,7 +25,6 @@ class ScanResult(BaseModel):
 
 
 class DeleteHistoryRequest(BaseModel):
-    # ใช้ string เพราะ id ใน Supabase เป็น uuid
     ids: list[str]
 
 app = FastAPI()
@@ -54,7 +53,7 @@ app.add_middleware(
         "localhost",
         "127.0.0.1",
         "*.railway.app",
-        "*.up.railway.app",  # coinlens-production.up.railway.app
+        "*.up.railway.app",
         "coinlens-production.up.railway.app",
     ],
 )
@@ -71,12 +70,22 @@ COIN_VALUES = {
     "10": 10.0,
 }
 
-
 _HERE = Path(__file__).resolve().parent
 _MODEL_PATH = _HERE / "best.pt"
 if not _MODEL_PATH.exists():
     _MODEL_PATH = _HERE.parent / "best.pt"
-model = YOLO(str(_MODEL_PATH))
+
+# ── Lazy model loading ──────────────────────────────────────────────────────
+# ไม่โหลดตอน startup — โหลดครั้งแรกที่มีคนเรียก /predict เท่านั้น
+# ทำให้ server ใช้ RAM น้อยตอน idle และไม่ถูก Railway kill
+_model = None
+
+def get_model() -> YOLO:
+    global _model
+    if _model is None:
+        _model = YOLO(str(_MODEL_PATH))
+    return _model
+# ───────────────────────────────────────────────────────────────────────────
 
 async def validate_image(file: UploadFile) -> bytes:
     contents = await file.read()
@@ -91,7 +100,9 @@ async def validate_image(file: UploadFile) -> bytes:
 def run_yolo(image_bytes: bytes) -> dict:
     try:
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        results = model(image, conf=0.6)[0]
+        results = get_model()(image, conf=0.6)[0]   # ← โหลด model เฉพาะตอนนี้
+    except HTTPException:
+        raise
     except Exception:
         raise HTTPException(400, "Failed to process image")
 
@@ -113,18 +124,10 @@ def run_yolo(image_bytes: bytes) -> dict:
         counts[class_name] += 1
         total_value += float(COIN_VALUES[class_name])
 
-        boxes.append(
-            {
-                "x": x_c,
-                "y": y_c,
-                "w": w,
-                "h": h,
-                "class": class_name,
-            }
-        )
+        boxes.append({"x": x_c, "y": y_c, "w": w, "h": h, "class": class_name})
 
     plotted = results.plot(labels=True, conf=False)
-    annotated_rgb = Image.fromarray(plotted[:, :, ::-1])  # BGR -> RGB
+    annotated_rgb = Image.fromarray(plotted[:, :, ::-1])
     buf = io.BytesIO()
     annotated_rgb.save(buf, format="PNG")
     annotated_b64 = base64.b64encode(buf.getvalue()).decode("ascii")
@@ -156,7 +159,6 @@ async def save_history_endpoint(
     from database import save_scan
 
     payload = verify_token(credentials.credentials)
-    # sanitize coins: only known keys, ints, non-negative
     clean_coins: dict[str, int] = {k: 0 for k in COIN_VALUES.keys()}
     for k, v in (result.coins or {}).items():
         if k in clean_coins:
