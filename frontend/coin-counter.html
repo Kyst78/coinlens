@@ -1039,6 +1039,7 @@
       isLoggedIn = false;
       userToken = null;
       HistoryCache.clear(); // ล้าง cache ตอน logout
+      ThumbCache.clear();   // ล้าง thumb memory cache
       document.getElementById('user-btns').style.display = 'none';
       document.getElementById('guest-btns').style.display = '';
     }
@@ -1079,6 +1080,16 @@ let selectedIds = new Set();
 let allSelected = false;
 let fileObjectURL = null;
 let isSaving = false;
+
+// ─── Thumb Memory Cache (ไม่มี quota limit) ───────
+// เก็บ thumb ใน RAM แยกต่างหาก key = record id
+const ThumbCache = {
+  _store: {},
+  get(id) { return this._store[id] || null; },
+  set(id, dataUrl) { if (id && dataUrl) this._store[id] = dataUrl; },
+  setMany(records) { records.forEach(r => { if (r.id && r.thumb) this._store[r.id] = r.thumb; }); },
+  clear() { this._store = {}; },
+};
 
 // ─── Cache Layer ──────────────────────────────────
 // ใช้ sessionStorage: ข้อมูลอยู่ตลอด session (ปิด tab = ล้าง)
@@ -1169,7 +1180,7 @@ async function fetchHistoryFromAPI(token) {
   });
   if (!resp.ok) throw new Error('Failed to load history');
   const records = await resp.json();
-  return (records || []).map(r => ({
+  const mapped = (records || []).map(r => ({
     id: r.id,
     date: r.scanned_at || new Date().toLocaleString('th-TH'),
     total: r.total_value,
@@ -1183,6 +1194,10 @@ async function fetchHistoryFromAPI(token) {
     },
     thumb: r.thumb || null,
   }));
+  // เก็บ thumb ใน memory cache แยก — ไม่มี quota limit
+  ThumbCache.setMany(mapped);
+  // return โดยไม่มี thumb (เพื่อกัน sessionStorage quota)
+  return mapped.map(r => ({ ...r, thumb: null }));
 }
 
 // ─── Page Switching ────────────────────────────────
@@ -1380,8 +1395,11 @@ async function saveResult() {
         '5':   created.coin_5   ?? 0,
         '10':  created.coin_10  ?? 0,
       },
-      thumb: created.thumb || currentResult.thumb || null,
+      thumb: null, // thumb เก็บใน ThumbCache แยก
     };
+
+    // เก็บ thumb ใน memory cache
+    if (thumbToSave) ThumbCache.set(mapped.id, thumbToSave);
 
     // ── อัปเดต state + cache พร้อมกัน ──
     history.unshift(mapped);
@@ -1510,7 +1528,7 @@ function renderHistoryGrid() {
     <div class="history-card ${selectedIds.has(h.id) ? 'selected' : ''}" onclick="toggleSelect('${h.id}')">
       <div class="check">${selectedIds.has(h.id) ? '✓' : ''}</div>
       <img class="history-thumb"
-           src="${h.thumb || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22160%22><rect fill=%22%2305050a%22 width=%22400%22 height=%22160%22/><text x=%22200%22 y=%2290%22 fill=%22%23333%22 text-anchor=%22middle%22 font-size=%2248%22>🪙</text></svg>'}"
+           src="${ThumbCache.get(h.id) || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22160%22><rect fill=%22%2305050a%22 width=%22400%22 height=%22160%22/><text x=%22200%22 y=%2290%22 fill=%22%23333%22 text-anchor=%22middle%22 font-size=%2248%22>🪙</text></svg>'}"
            alt="coin photo">
       <div class="history-body">
         <div class="date">📅 ${h.date}</div>
