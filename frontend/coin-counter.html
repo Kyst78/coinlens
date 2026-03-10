@@ -111,6 +111,7 @@
     display: flex;
     align-items: center;
     gap: .75rem;
+    position: relative; /* for absolute dropdown positioning */
   }
 
   .btn-login {
@@ -148,6 +149,36 @@
   }
 
   .avatar:hover { border-color: var(--gold); }
+
+  /* user menu dropdown */
+  .user-menu {
+    position: absolute;
+    top: 120%;
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: .25rem 0;
+    display: none;
+    white-space: nowrap;
+    z-index: 200;
+  }
+
+  .user-menu.show { display: block; }
+
+  .user-menu button {
+    background: none;
+    border: none;
+    color: var(--text);
+    padding: .5rem 1rem;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Sarabun', sans-serif;
+    font-size: .9rem;
+  }
+
+  .user-menu button:hover { background: rgba(245,200,66,.1); }
 
   .page { display: none; }
   .page.active { display: block; }
@@ -862,9 +893,13 @@
         เข้าสู่ระบบ
       </button>
     </div>
-    <div id="user-btns" style="display:none; align-items:center; gap:.6rem; display:none;">
+    <div id="user-btns" style="display:none; align-items:center; gap:.6rem; display:none; position:relative;">
       <span style="font-size:.85rem; color:var(--muted)">สวัสดี, <span id="user-name">User</span></span>
-      <div class="avatar" title="ออกจากระบบ" onclick="logout()">U</div>
+      <div class="avatar" title="เมนูผู้ใช้" onclick="toggleUserMenu()">U</div>
+      <!-- dropdown menu shown when avatar is clicked -->
+      <div class="user-menu" id="user-menu">
+        <button onclick="logout()">ออกจากระบบ</button>
+      </div>
     </div>
   </div>
 </nav>
@@ -1666,6 +1701,22 @@ function logout() {
   window.firebaseLogout();
 }
 
+// toggle the small dropdown behind the avatar
+function toggleUserMenu() {
+  const menu = document.getElementById('user-menu');
+  if (!menu) return;
+  menu.classList.toggle('show');
+}
+
+// close menu when clicking anywhere else
+document.addEventListener('click', e => {
+  const menu = document.getElementById('user-menu');
+  if (!menu) return;
+  const avatar = document.querySelector('.avatar');
+  if (menu.classList.contains('show') && !menu.contains(e.target) && e.target !== avatar) {
+    menu.classList.remove('show');
+  }
+});
 document.querySelectorAll('.modal-backdrop').forEach(m => {
   m.addEventListener('click', e => {
     if (e.target === m) m.classList.remove('show');
