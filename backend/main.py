@@ -100,7 +100,7 @@ async def validate_image(file: UploadFile) -> bytes:
 def run_yolo(image_bytes: bytes) -> dict:
     try:
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        results = get_model()(image, conf=0.5,iou=1)[0]   # ← โหลด model เฉพาะตอนนี้
+        results = get_model()(image, conf=0.5, iou=0.3, agnostic_nms=True)[0] # ← โหลด model เฉพาะตอนนี้
     except HTTPException:
         raise
     except Exception:
