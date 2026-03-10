@@ -1243,6 +1243,10 @@ async function processImage(file) {
   img.src = fileObjectURL;
 
   document.getElementById('preview-panel').classList.add('show');
+  // hide upload area when showing preview
+  const uploadEl = document.getElementById('dropzone');
+  if (uploadEl) uploadEl.style.display = 'none';
+
   document.getElementById('total-val').textContent = '—';
   document.getElementById('coin-breakdown').innerHTML = '';
   document.getElementById('result-actions').style.display = 'none';
@@ -1423,6 +1427,10 @@ async function saveResult() {
 
 function resetUpload() {
   document.getElementById('preview-panel').classList.remove('show');
+  // show upload area again
+  const uploadEl = document.getElementById('dropzone');
+  if (uploadEl) uploadEl.style.display = '';
+
   document.getElementById('file-input').value = '';
   currentResult = null;
   const btnSave = document.querySelector('#result-actions .btn-save');
